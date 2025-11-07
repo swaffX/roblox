@@ -1,7 +1,10 @@
 {
   "name": "AI Coder Plugin",
   "tree": {
-    "$path": "src/Plugin.lua",
+    "$className": "Plugin",
+    "Main": {
+      "$path": "src/Plugin.server.lua"
+    },
     "Config": {
       "$path": "src/Config.lua"
     },

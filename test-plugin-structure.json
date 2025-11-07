@@ -1,0 +1,11 @@
+{
+  "name": "Test Plugin",
+  "tree": {
+    "$className": "Plugin",
+    "Main": {
+      "$path": "test-plugin-code.lua"
+    }
+  }
+}
+
+
