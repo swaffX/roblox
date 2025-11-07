@@ -7,34 +7,64 @@
 
 local ResponseParser = {}
 
--- Kod bloklarını çıkar
+-- Kod bloklarını çıkar (Duplikasyon kontrolü ile)
 local function extractCodeBlocks(text)
 	local codeBlocks = {}
+	local seenCodes = {} -- Duplikasyon kontrol için
+	
+	-- Helper function: kod hash'ini oluştur (duplikasyon tespit)
+	local function getCodeHash(code)
+		-- Whitespace'i normalize et ve hash oluştur
+		local normalized = string.gsub(code, "%s+", " ")
+		normalized = string.gsub(normalized, "^%s+", "")
+		normalized = string.gsub(normalized, "%s+$", "")
+		return normalized
+	end
+	
+	-- Helper function: kod bloğu ekle (duplikasyon kontrolü ile)
+	local function addCodeBlock(language, code)
+		if not code or #code == 0 then
+			return
+		end
+		
+		local codeHash = getCodeHash(code)
+		
+		-- Aynı kod zaten varsa ekleme
+		if seenCodes[codeHash] then
+			return
+		end
+		
+		seenCodes[codeHash] = true
+		table.insert(codeBlocks, {
+			language = language or "lua",
+			code = code,
+			hash = codeHash
+		})
+	end
 	
 	-- ```lua ... ``` pattern'i bul
 	for codeBlock in string.gmatch(text, "```lua\n(.-)\n```") do
-		table.insert(codeBlocks, {
-			language = "lua",
-			code = codeBlock
-		})
+		addCodeBlock("lua", codeBlock)
 	end
 	
 	-- ```luau ... ``` pattern'i bul
 	for codeBlock in string.gmatch(text, "```luau\n(.-)\n```") do
-		table.insert(codeBlocks, {
-			language = "luau",
-			code = codeBlock
-		})
+		addCodeBlock("luau", codeBlock)
+	end
+	
+	-- ```Lua ... ``` (büyük harf)
+	for codeBlock in string.gmatch(text, "```Lua\n(.-)\n```") do
+		addCodeBlock("lua", codeBlock)
 	end
 	
 	-- Generic ``` ... ``` (language belirtilmemiş)
-	if #codeBlocks == 0 then
-		for codeBlock in string.gmatch(text, "```\n(.-)\n```") do
-			table.insert(codeBlocks, {
-				language = "unknown",
-				code = codeBlock
-			})
-		end
+	for codeBlock in string.gmatch(text, "```\n(.-)\n```") do
+		addCodeBlock("lua", codeBlock)
+	end
+	
+	-- Alternatif format: ```lua ... ``` (whitespace tolerant)
+	for codeBlock in string.gmatch(text, "```%s*lua%s*(.-)\n```") do
+		addCodeBlock("lua", codeBlock)
 	end
 	
 	return codeBlocks
@@ -57,12 +87,14 @@ local function extractScriptPath(text)
 	return nil
 end
 
--- Operation tipini detect et
+-- Operation tipini detect et (genişletilmiş)
 local function detectOperation(text)
 	local lowerText = string.lower(text)
 	
 	if string.match(lowerText, "creat") or string.match(lowerText, "new script") then
 		return "create"
+	elseif string.match(lowerText, "create.*part") or string.match(lowerText, "create.*model") or string.match(lowerText, "create.*gui") then
+		return "create_instance"
 	elseif string.match(lowerText, "delet") or string.match(lowerText, "remov") then
 		return "delete"
 	elseif string.match(lowerText, "updat") or string.match(lowerText, "modif") or string.match(lowerText, "chang") then
@@ -72,6 +104,52 @@ local function detectOperation(text)
 	end
 	
 	return "unknown"
+end
+
+-- Instance tanımı extract et
+local function extractInstanceDefinitions(text)
+	local instances = {}
+	
+	-- "Create a Part/Model/ScreenGui named X in Y" pattern
+	local pattern = "%b[]"
+	
+	-- JSON-like format: {type: "Part", name: "MyPart", parent: "Workspace", properties: {...}}
+	for instanceDef in string.gmatch(text, "%{%s*[^}]*type[^}]*%}") do
+		table.insert(instances, instanceDef)
+	end
+	
+	return instances
+end
+
+-- Instance tanımını parse et
+local function parseInstanceDefinition(definition)
+	-- Simple JSON parsing simulation
+	local instance = {
+		type = "Part",
+		name = "Instance",
+		parent = "Workspace",
+		properties = {}
+	}
+	
+	-- Type extract
+	local typeMatch = string.match(definition, '["\']?type["\']?%s*:%s*["\']([^"\']+)["\']')
+	if typeMatch then
+		instance.type = typeMatch
+	end
+	
+	-- Name extract
+	local nameMatch = string.match(definition, '["\']?name["\']?%s*:%s*["\']([^"\']+)["\']')
+	if nameMatch then
+		instance.name = nameMatch
+	end
+	
+	-- Parent extract
+	local parentMatch = string.match(definition, '["\']?parent["\']?%s*:%s*["\']([^"\']+)["\']')
+	if parentMatch then
+		instance.parent = parentMatch
+	end
+	
+	return instance
 end
 
 -- Explanation çıkar (kod bloklarından önceki/sonraki açıklama)
@@ -88,7 +166,7 @@ local function extractExplanation(text)
 	return text
 end
 
--- Ana parse fonksiyonu
+-- Ana parse fonksiyonu (genişletilmiş)
 function ResponseParser.parse(responseText)
 	if not responseText or #responseText == 0 then
 		return {
@@ -96,7 +174,9 @@ function ResponseParser.parse(responseText)
 			codeBlocks = {},
 			operation = "none",
 			explanation = "",
-			scriptPath = nil
+			scriptPath = nil,
+			instanceDefinitions = {},
+			duplicateWarning = false
 		}
 	end
 	
@@ -104,6 +184,13 @@ function ResponseParser.parse(responseText)
 	local operation = detectOperation(responseText)
 	local scriptPath = extractScriptPath(responseText)
 	local explanation = extractExplanation(responseText)
+	local instanceDefinitions = extractInstanceDefinitions(responseText)
+	
+	-- Duplikasyon uyarısı
+	local duplicateWarning = false
+	if #codeBlocks > 3 then
+		duplicateWarning = true -- Çok fazla kod bloğu
+	end
 	
 	return {
 		hasCode = #codeBlocks > 0,
@@ -111,7 +198,9 @@ function ResponseParser.parse(responseText)
 		operation = operation,
 		explanation = explanation,
 		scriptPath = scriptPath,
-		rawResponse = responseText
+		instanceDefinitions = instanceDefinitions,
+		rawResponse = responseText,
+		duplicateWarning = duplicateWarning
 	}
 end
 
