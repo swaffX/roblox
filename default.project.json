@@ -1,0 +1,7 @@
+{
+  "name": "AI Coder Plugin",
+  "tree": {
+    "$className": "Folder",
+    "$path": "src"
+  }
+}

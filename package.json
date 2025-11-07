@@ -1,0 +1,28 @@
+{
+  "name": "roblox-ai-coder-plugin",
+  "version": "1.0.0",
+  "description": "AI-powered coding assistant plugin for Roblox Studio with multi-AI API support",
+  "author": "swxff",
+  "license": "MIT",
+  "scripts": {
+    "build": "rojo build default.project.json -o plugin.rbxm",
+    "watch": "rojo serve default.project.json",
+    "install-plugin": "powershell -Command \"Copy-Item plugin.rbxm -Destination $env:LOCALAPPDATA/Roblox/Plugins/ -Force\"",
+    "dev": "npm run build && npm run install-plugin",
+    "clean": "powershell -Command \"Remove-Item plugin.rbxm -ErrorAction SilentlyContinue\""
+  },
+  "keywords": [
+    "roblox",
+    "plugin",
+    "ai",
+    "coder",
+    "assistant",
+    "openai",
+    "claude",
+    "gemini"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swxff/roblox-ai-coder-plugin.git"
+  }
+}
