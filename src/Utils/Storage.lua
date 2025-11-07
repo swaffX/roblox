@@ -141,6 +141,9 @@ function Storage:setAPIKey(provider, key)
 	return true
 end
 
+-- Alias for compatibility
+Storage.saveAPIKey = Storage.setAPIKey
+
 -- Remove API key for provider
 function Storage:removeAPIKey(provider)
 	local keyName = Config.STORAGE_KEYS["API_KEY_" .. string.upper(provider)]

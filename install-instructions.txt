@@ -1,0 +1,58 @@
+﻿-- Bu kodu Roblox Studio'da Command Bar'a yapıştırın:
+
+-- 1. Plugin Instance Oluştur
+local plugin = Instance.new('Plugin')
+plugin.Name = 'AI Coder Plugin'
+
+-- 2. Main Script Oluştur  
+local mainScript = Instance.new('Script')
+mainScript.Name = 'Main'
+mainScript.Parent = plugin
+mainScript.Source = [[
+print('AI Coder Plugin Yükleniyor...')
+
+local toolbar = plugin:CreateToolbar('AI Coder')
+local button = toolbar:CreateButton(
+    'AI Coder',
+    'AI-powered coding assistant',
+    'rbxasset://textures/ui/TopBar/inventoryOn.png'
+)
+
+local widgetInfo = DockWidgetPluginGuiInfo.new(
+    Enum.InitialDockState.Float,
+    false,
+    false,
+    600,
+    700,
+    400,
+    500
+)
+
+local widget = plugin:CreateDockWidgetPluginGui('AICoderWidget', widgetInfo)
+widget.Title = 'AI Coder Assistant'
+
+local frame = Instance.new('Frame')
+frame.Size = UDim2.new(1, 0, 1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 27, 31)
+frame.Parent = widget
+
+local label = Instance.new('TextLabel')
+label.Size = UDim2.new(1, -20, 0, 100)
+label.Position = UDim2.new(0, 10, 0, 10)
+label.Text = 'AI Coder Plugin\n\nReady to assist!'
+label.TextColor3 = Color3.new(1, 1, 1)
+label.TextSize = 24
+label.BackgroundTransparency = 1
+label.Font = Enum.Font.GothamBold
+label.Parent = frame
+
+button.Click:Connect(function()
+    widget.Enabled = not widget.Enabled
+end)
+
+print('AI Coder Plugin loaded successfully!')
+]]
+
+-- 3. Export Et
+game:GetService('Selection'):Set({plugin})
+print('Plugin oluşturuldu! Şimdi Selection üzerinde sağ tıkla -> Save to File')
