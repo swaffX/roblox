@@ -26,9 +26,51 @@ local SCRIPT_TYPES = {
 	ModuleScript = "ModuleScript"
 }
 
+-- Oluşturulabilir Instance tiplerini tanımla
+local CREATABLE_TYPES = {
+	-- UI
+	ScreenGui = "ScreenGui",
+	TextLabel = "TextLabel",
+	TextBox = "TextBox",
+	TextButton = "TextButton",
+	Frame = "Frame",
+	ImageLabel = "ImageLabel",
+	ImageButton = "ImageButton",
+	
+	-- Model Parts
+	Model = "Model",
+	Part = "Part",
+	WedgePart = "WedgePart",
+	CornerWedgePart = "CornerWedgePart",
+	Truss = "Truss",
+	
+	-- Assemblies
+	UnionOperation = "UnionOperation",
+	NegateOperation = "NegateOperation",
+	
+	-- Containers
+	Folder = "Folder",
+	
+	-- Humanoid and Characters
+	Humanoid = "Humanoid",
+	BodyVelocity = "BodyVelocity",
+	BodyGyro = "BodyGyro",
+	BodyThrust = "BodyThrust",
+	
+	-- Scripts
+	Script = "Script",
+	LocalScript = "LocalScript",
+	ModuleScript = "ModuleScript"
+}
+
 -- Instance'ın script olup olmadığını kontrol et
 local function isScript(instance)
 	return instance:IsA("Script") or instance:IsA("LocalScript") or instance:IsA("ModuleScript")
+end
+
+-- Instance'ın oluşturulabilir bir tip olup olmadığını kontrol et
+local function isCreatable(typeName)
+	return CREATABLE_TYPES[typeName] ~= nil
 end
 
 -- Instance'ın tam yolunu al
@@ -504,6 +546,189 @@ function WorkspaceManager:getServices()
 		StarterPack = game:GetService("StarterPack"),
 		StarterGui = game:GetService("StarterGui")
 	}
+end
+
+-- Yeni Instance oluştur (Script veya UI/Model)
+function WorkspaceManager:createInstance(parent, instanceName, instanceType, properties)
+	if not parent then
+		return nil, "Parent instance is nil"
+	end
+	
+	if not isCreatable(instanceType) then
+		return nil, "Instance type '" .. tostring(instanceType) .. "' is not creatable"
+	end
+	
+	-- Script için special handling
+	if isScript(instanceType) then
+		return self:createScript(parent, instanceName, instanceType, properties and properties.Source or "")
+	end
+	
+	-- Diğer Instance'lar için
+	local success, result = pcall(function()
+		local newInstance = Instance.new(instanceType)
+		newInstance.Name = instanceName
+		
+		-- Özellikleri uygula
+		if properties then
+			for propName, propValue in pairs(properties) do
+				if propName ~= "Source" and propName ~= "Parent" then
+					local ok, err = pcall(function()
+						newInstance[propName] = propValue
+					end)
+					if not ok and self._logger then
+						self._logger:warn("Failed to set property", {
+							instance = instanceName,
+							property = propName,
+							error = err
+						})
+					end
+				end
+			end
+		end
+		
+		newInstance.Parent = parent
+		return newInstance
+	end)
+	
+	if not success then
+		if self._logger then
+			self._logger:error("Failed to create instance", {
+				name = instanceName,
+				type = instanceType,
+				error = result
+			})
+		end
+		return nil, result
+	end
+	
+	if self._logger then
+		self._logger:info("Instance created", {
+			name = instanceName,
+			type = instanceType,
+			path = getFullPath(result)
+		})
+	end
+	
+	return result
+end
+
+-- Instance sil
+function WorkspaceManager:deleteInstance(instance)
+	if not instance then
+		return false, "Instance is nil"
+	end
+	
+	local instanceName = instance.Name
+	local instanceType = instance.ClassName
+	
+	local success, error = pcall(function()
+		instance:Destroy()
+	end)
+	
+	if not success then
+		if self._logger then
+			self._logger:error("Failed to delete instance", {
+				name = instanceName,
+				type = instanceType,
+				error = error
+			})
+		end
+		return false, error
+	end
+	
+	if self._logger then
+		self._logger:info("Instance deleted", { name = instanceName })
+	end
+	
+	return true
+end
+
+-- Instance'ın tüm alt Instance'larını bul
+function WorkspaceManager:findAllInstancesByType(parent, typeName)
+	parent = parent or game
+	local instances = {}
+	
+	local function searchRecursive(container)
+		for _, child in ipairs(container:GetChildren()) do
+			if child:IsA(typeName) then
+				table.insert(instances, {
+					instance = child,
+					name = child.Name,
+					type = child.ClassName,
+					path = getFullPath(child)
+				})
+			end
+			
+			-- Recursive search
+			if child:IsA("Folder") or child:IsA("Model") or (child:FindFirstChildOfClass("Instance") ~= nil) then
+				searchRecursive(child)
+			end
+		end
+	end
+	
+	searchRecursive(parent)
+	return instances
+end
+
+-- Instance'ı path ile bul
+function WorkspaceManager:findInstanceByPath(path)
+	local parts = {}
+	for part in string.gmatch(path, "[^%.]+") do
+		table.insert(parts, part)
+	end
+	
+	if #parts == 0 then
+		return nil
+	end
+	
+	-- İlk part service olmalı
+	local current = game:GetService(parts[1])
+	if not current then
+		current = game:FindFirstChild(parts[1])
+	end
+	
+	if not current then
+		return nil
+	end
+	
+	-- Devam eden path'i takip et
+	for i = 2, #parts do
+		current = current:FindFirstChild(parts[i])
+		if not current then
+			return nil
+		end
+	end
+	
+	return current
+end
+
+-- Instance'ın tüm Instance'larını al (hiyerarşi)
+function WorkspaceManager:findAllInstances(parent)
+	parent = parent or game
+	local instances = {}
+	
+	local function searchRecursive(container, depth)
+		depth = depth or 0
+		if depth > 20 then return end -- Sonsuz döngü önlemek
+		
+		for _, child in ipairs(container:GetChildren()) do
+			table.insert(instances, {
+				instance = child,
+				name = child.Name,
+				type = child.ClassName,
+				path = getFullPath(child),
+				depth = depth
+			})
+			
+			-- Recursive search
+			if child:FindFirstChildOfClass("Instance") ~= nil then
+				searchRecursive(child, depth + 1)
+			end
+		end
+	end
+	
+	searchRecursive(parent)
+	return instances
 end
 
 return WorkspaceManager

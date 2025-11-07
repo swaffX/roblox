@@ -1,8 +1,8 @@
 --[[
 	CodeAnalyzer - Kod Analiz Modülü
 	
-	Workspace'i analiz eder, dependency mapping, function/variable inventory
-	ve AI için context building yapar.
+	Workspace'i analiz eder, dependency mapping, function/variable inventory,
+	semantic context building ve AI için genişletilmiş context yapılandırması yapar.
 ]]
 
 local CodeAnalyzer = {}
@@ -13,6 +13,7 @@ function CodeAnalyzer.new(workspaceManager, logger)
 	
 	self._workspace = workspaceManager
 	self._logger = logger
+	self._semanticCache = {} -- Semantic analiz cache'i
 	
 	return self
 end
@@ -180,6 +181,213 @@ function CodeAnalyzer:formatContextForAI(context)
 	for _, script in ipairs(context.scripts) do
 		table.insert(lines, string.format("- %s (%s): %s", script.name, script.type, script.summary))
 	end
+	
+	return table.concat(lines, "\n")
+end
+
+-- Semantic analiz - Projedeki main sistemleri tespit et
+function CodeAnalyzer:performSemanticAnalysis(parent)
+	parent = parent or game
+	
+	local analysis = {
+		systems = {},
+		patterns = {},
+		dependencies = {},
+		architectureType = "unknown"
+	}
+	
+	local allScripts = self._workspace:findAllScripts(parent)
+	local scriptNames = {}
+	local scriptSources = {}
+	
+	for _, scriptData in ipairs(allScripts) do
+		table.insert(scriptNames, string.lower(scriptData.name))
+		scriptSources[scriptData.name] = scriptData.source
+	end
+	
+	-- Sistem tespiti (adlara ve içeriğe göre)
+	local systemPatterns = {
+		gameManager = {"game", "manager", "main"},
+		playerHandler = {"player", "character", "spawn"},
+		uiSystem = {"ui", "gui", "menu", "hud"},
+		combatSystem = {"combat", "fight", "damage", "health"},
+		inventorySystem = {"inventory", "item", "storage"},
+		levelSystem = {"level", "experience", "exp"},
+		networkSystem = {"network", "remote", "replicate"},
+		physicsSystem = {"physics", "velocity", "gravity"},
+		soundSystem = {"sound", "audio", "music"},
+		saveSystem = {"save", "load", "database", "data"}
+	}
+	
+	for systemName, patterns in pairs(systemPatterns) do
+		for _, scriptName in ipairs(scriptNames) do
+			for _, pattern in ipairs(patterns) do
+				if string.match(scriptName, pattern) then
+					if not analysis.systems[systemName] then
+						analysis.systems[systemName] = {}
+					end
+					table.insert(analysis.systems[systemName], scriptName)
+					break
+				end
+			end
+		end
+	end
+	
+	-- Pattern tespiti
+	local patternChecks = {
+		["Event-Driven"] = function(source)
+			return string.match(source, "Signal") or string.match(source, ":Fire%(") or string.match(source, ":Wait%(")
+		end,
+		["MVC Pattern"] = function(source)
+			return string.match(source, "Controller") or string.match(source, "Model") or string.match(source, "View")
+		end,
+		["OOP Pattern"] = function(source)
+			return string.match(source, "%.__index") or string.match(source, "setmetatable")
+		end,
+		["Functional Pattern"] = function(source)
+			return string.match(source, "local%s+function") and string.match(source, "return%s+{")
+		end
+	}
+	
+	for scriptName, source in pairs(scriptSources) do
+		for patternName, checker in pairs(patternChecks) do
+			if checker(source) then
+				if not analysis.patterns[patternName] then
+					analysis.patterns[patternName] = 0
+				end
+				analysis.patterns[patternName] = analysis.patterns[patternName] + 1
+			end
+		end
+	end
+	
+	-- Mimari tipi tespiti
+	local mvcCount = analysis.patterns["MVC Pattern"] or 0
+	local oopCount = analysis.patterns["OOP Pattern"] or 0
+	local eventCount = analysis.patterns["Event-Driven"] or 0
+	
+	if mvcCount > eventCount and mvcCount > oopCount then
+		analysis.architectureType = "MVC-based"
+	elseif oopCount > eventCount then
+		analysis.architectureType = "OOP-based"
+	elseif eventCount > 0 then
+		analysis.architectureType = "Event-driven"
+	end
+	
+	return analysis
+end
+
+-- Genişletilmiş AI context oluştur (daha geniş bağlam)
+function CodeAnalyzer:buildExtendedAIContext(parent, maxScripts)
+	maxScripts = maxScripts or 20 -- Varsayılan 20, daha fazla script
+	
+	local allScripts = self._workspace:findAllScripts(parent)
+	local semanticAnalysis = self:performSemanticAnalysis(parent)
+	
+	local context = {
+		projectSummary = string.format("Project has %d scripts", #allScripts),
+		semanticAnalysis = semanticAnalysis,
+		scripts = {},
+		allInstances = {},
+		dependencies = {}
+	}
+	
+	-- En önemli scriptleri seç
+	local prioritizedScripts = {}
+	for _, scriptData in ipairs(allScripts) do
+		local analysis = self:analyzeScript(scriptData.instance)
+		if analysis then
+			table.insert(prioritizedScripts, {
+				data = scriptData,
+				analysis = analysis,
+				score = analysis.complexity + (analysis.lineCount / 10)
+			})
+		end
+	end
+	
+	table.sort(prioritizedScripts, function(a, b)
+		return a.score > b.score
+	end)
+	
+	-- İlk N script'i context'e ekle
+	for i = 1, math.min(maxScripts, #prioritizedScripts) do
+		local item = prioritizedScripts[i]
+		table.insert(context.scripts, {
+			name = item.data.name,
+			path = item.data.path,
+			type = item.data.type,
+			summary = string.format(
+				"%d lines, %d functions, complexity %d",
+				item.analysis.lineCount,
+				#item.analysis.functions,
+				item.analysis.complexity
+			),
+			functions = table.concat(item.analysis.functions, ", "),
+			variables = table.concat(item.analysis.variables, ", ")
+		})
+	end
+	
+	-- Tüm Instance'ları (UI, Model, Parts vb.) bul
+	local allInstances = self._workspace:findAllInstances(parent)
+	local instanceTypes = {}
+	
+	for _, instData in ipairs(allInstances) do
+		if not instanceTypes[instData.type] then
+			instanceTypes[instData.type] = 0
+		end
+		instanceTypes[instData.type] = instanceTypes[instData.type] + 1
+	end
+	
+	context.allInstances = instanceTypes
+	
+	return context
+end
+
+-- Genişletilmiş context'i string olarak formatla
+function CodeAnalyzer:formatExtendedContextForAI(context)
+	local lines = {
+		"=== EXTENDED PROJECT CONTEXT ===",
+		context.projectSummary,
+		""
+	}
+	
+	-- Semantic analiz
+	if context.semanticAnalysis then
+		table.insert(lines, "=== DETECTED SYSTEMS ===")
+		for systemName, scripts in pairs(context.semanticAnalysis.systems) do
+			if #scripts > 0 then
+				table.insert(lines, string.format("- %s: %s", systemName, table.concat(scripts, ", ")))
+			end
+		end
+		table.insert(lines, "")
+		
+		table.insert(lines, string.format("=== ARCHITECTURE ==="))
+		table.insert(lines, "Type: " .. context.semanticAnalysis.architectureType)
+		table.insert(lines, "")
+	end
+	
+	-- Scriptler
+	table.insert(lines, "=== KEY SCRIPTS ===")
+	for _, script in ipairs(context.scripts) do
+		table.insert(lines, string.format("- %s (%s): %s", script.name, script.type, script.summary))
+		if #script.functions > 0 then
+			table.insert(lines, "  Functions: " .. script.functions)
+		end
+	end
+	table.insert(lines, "")
+	
+	-- Instance türleri
+	if context.allInstances then
+		table.insert(lines, "=== AVAILABLE INSTANCE TYPES ===")
+		for instanceType, count in pairs(context.allInstances) do
+			table.insert(lines, string.format("- %s: %d", instanceType, count))
+		end
+		table.insert(lines, "")
+	end
+	
+	table.insert(lines, "=== INSTRUCTIONS ===")
+	table.insert(lines, "Consider the project architecture and detected systems when responding.")
+	table.insert(lines, "You can create Parts, Models, ScreenGuis, Scripts, and other Roblox instances.")
+	table.insert(lines, "Always specify the parent container when creating instances.")
 	
 	return table.concat(lines, "\n")
 end
