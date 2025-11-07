@@ -17,7 +17,7 @@ function PromptBuilder.new(codeAnalyzer)
 	return self
 end
 
--- AI mesaj dizisi oluştur
+-- AI mesaj dizisi oluştur (standart context)
 function PromptBuilder:buildMessages(userMessage, selectedScript, includeContext)
 	includeContext = includeContext == nil and true or includeContext
 	
@@ -26,10 +26,10 @@ function PromptBuilder:buildMessages(userMessage, selectedScript, includeContext
 	-- System prompt
 	local systemPrompt = Config.SYSTEM_PROMPTS.DEFAULT
 	
-	-- Context ekle
+	-- Extended context ekle
 	if includeContext and self._analyzer then
-		local context = self._analyzer:buildAIContext(game, 10)
-		local contextStr = self._analyzer:formatContextForAI(context)
+		local context = self._analyzer:buildExtendedAIContext(game, 20)
+		local contextStr = self._analyzer:formatExtendedContextForAI(context)
 		systemPrompt = systemPrompt .. "\n\n" .. contextStr
 	end
 	
@@ -39,6 +39,54 @@ function PromptBuilder:buildMessages(userMessage, selectedScript, includeContext
 		systemPrompt = systemPrompt .. string.format(
 			"\n\nCurrently selected script: %s\n```lua\n%s\n```",
 			selectedScript.Name,
+			source
+		)
+	end
+	
+	table.insert(messages, {
+		role = "system",
+		content = systemPrompt
+	})
+	
+	-- User message
+	table.insert(messages, {
+		role = "user",
+		content = userMessage
+	})
+	
+	return messages
+end
+
+-- Genişletilmiş context ile mesaj oluştur
+function PromptBuilder:buildMessagesWithExtendedContext(userMessage, selectedScript, contextLevel)
+	contextLevel = contextLevel or 2 -- 1=minimal, 2=normal, 3=extensive
+	
+	local messages = {}
+	local maxScripts = 10
+	
+	if contextLevel == 2 then
+		maxScripts = 20
+	elseif contextLevel == 3 then
+		maxScripts = 40
+	end
+	
+	-- System prompt
+	local systemPrompt = Config.SYSTEM_PROMPTS.DEFAULT
+	
+	-- Extended context ekle
+	if self._analyzer then
+		local context = self._analyzer:buildExtendedAIContext(game, maxScripts)
+		local contextStr = self._analyzer:formatExtendedContextForAI(context)
+		systemPrompt = systemPrompt .. "\n\n" .. contextStr
+	end
+	
+	-- Selected script varsa ekle
+	if selectedScript then
+		local source = selectedScript.Source
+		systemPrompt = systemPrompt .. string.format(
+			"\n\nCurrently selected script: %s (Type: %s)\n```lua\n%s\n```",
+			selectedScript.Name,
+			selectedScript.ClassName,
 			source
 		)
 	end
