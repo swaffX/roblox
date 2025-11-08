@@ -1,0 +1,65 @@
+-- Send message
+local sending=false
+
+send = function()
+  if sending then return end
+  local msg = prompt.Text:gsub('^%s+',''):gsub('%s+$','')
+  if #msg==0 then return end
+  
+  -- Check if there's an active quote
+  local quoteFrame = bar:FindFirstChild('QuoteFrame')
+  local fullMsg = msg
+  
+  if quoteFrame and quoteFrame.Visible then
+    -- Include quote in message
+    local quoteText = quoteFrame:FindFirstChild('QuoteText')
+    if quoteText then
+      fullMsg = '**[QUOTE]**\n' .. quoteText.Text .. '\n\n**[REPLY]**\n' .. msg
+    end
+    -- Hide quote frame
+    quoteFrame.Visible = false
+    promptRow.Position = UDim2.new(0,10,0,8)
+  end
+  
+  -- MODE-AWARE EXECUTION
+  if currentMode == 'Ask' then
+    -- Ask mode: Deep research with context
+    executeAskMode(fullMsg)
+    return
+  end
+  
+  -- Agent mode: Continue with normal execution below
+  
+  prompt.Text=''
+  
+  -- Add to message history
+  table.insert(messageHistory, msg)
+  if #messageHistory > 50 then table.remove(messageHistory, 1) end
+  historyIndex = 0  -- Reset history position
+  
+  if not currentModel then
+    addMsg('System','⚠️ Please select a model first',true)
+    return
+  end
+  
+  mem=mem or {}
+  table.insert(mem, {role='user', content=fullMsg})
+  if #mem>100 then table.remove(mem,1) end
+  
+  addMsg('You', fullMsg)
+  
+  local prov=providerOf(currentModel)
+  if not prov then
+    addMsg('System','⚠️ Invalid model configuration',true)
+    return
+  end
+  local key=Store:getKey(prov)
+  
+  if not key or #key<10 then
+    addMsg('System','⚠️ No API key for '..prov..'. Click model selector to add key.',true)
+    return
+  end
+  
+  -- Continue with rest of Agent Mode send() function...
+  -- (rest of the original code after line 2756 should be here)
+end

@@ -1,388 +1,493 @@
-﻿# WARP.md
+# 🚀 Neurovia Coder v4.1.0 - Warp AI Setup Guide
 
-This file provides complete guidance to WARP AI for working with this Roblox Studio plugin project.
-
----
-
-## 🎯 Project Type
-
-**Roblox Studio Plugin: Neurovia Coder v2.0.0** - AI-powered coding assistant with multi-provider support (OpenAI, Claude, Gemini)
-
-**IMPORTANT: Single-File Plugin System**
-This project uses a **single .lua file** deployment to avoid Rojo packaging crashes. The source code is modular (`src/` directory) but builds to one file (`neurovia-coder-full.lua`).
+> **Complete Setup & Development Guide for AI Assistants**
 
 ---
 
-## 🚀 Complete Setup Workflow (Run This for New Contributors)
+## 📋 Quick Reference
 
-This project uses a **single-file plugin** system to avoid Rojo packaging crashes.
+**Project:** Neurovia Coder v4.1.0 - AI-Powered Roblox Studio Plugin  
+**File:** `C:\Users\swxff\AppData\Local\Roblox\Plugins\NeuroviaVibe.lua`  
+**Lines:** 3900+  
+**Status:** Production Ready ✅  
+**Latest:** Quote frame system, Enhanced delete intent, Scroll position fixes
 
-### Quick Install (Recommended)
+---
+
+## 🎯 FOR WARP AI: PROJECT CONTEXT
+
+This is a **Roblox Studio plugin** that provides an AI-powered coding assistant directly inside Roblox Studio. Think of it as "Cursor IDE for Roblox".
+
+### Key Capabilities
+- 🤖 **8 AI Models** - OpenAI, Anthropic, Gemini, xAI
+- 🎨 **Modern UI** - Cursor IDE-inspired dark theme
+- 💬 **2 Agent Modes** - Agent (autonomous) & Ask (research)
+- 🔐 **Smart API Management** - Real-time validation, encrypted storage
+- 📋 **Quote System** - Reference debug logs in chat
+- 🗑️ **Smart Deletion** - AI-assisted object removal
+- 📜 **Message History** - Arrow keys (↑/↓) for previous commands
+
+---
+
+## 🏗️ INSTALLATION GUIDE
+
+### For Your Friend (First Time Setup)
 
 ```powershell
-# Run install script
-.\install-plugin.bat
+# === STEP 1: Install Roblox Studio ===
+# Download from: https://www.roblox.com/create
+# Sign in with Roblox account
+
+# === STEP 2: Create Plugins Folder ===
+$pluginsPath = "$env:LOCALAPPDATA\Roblox\Plugins"
+if (!(Test-Path $pluginsPath)) {
+    New-Item -ItemType Directory -Path $pluginsPath -Force
+    Write-Host "✅ Plugins folder created"
+}
+
+# === STEP 3: Install Plugin ===
+# Place NeuroviaVibe.lua in current directory, then run:
+Copy-Item ".\NeuroviaVibe.lua" $pluginsPath -Force
+Write-Host "✅ Plugin installed!"
+
+# === STEP 4: Verify ===
+if (Test-Path "$pluginsPath\NeuroviaVibe.lua") {
+    $size = (Get-Item "$pluginsPath\NeuroviaVibe.lua").Length / 1KB
+    Write-Host "✅ File size: $([math]::Round($size, 2)) KB"
+    Write-Host "✅ Installation complete!"
+} else {
+    Write-Host "❌ Installation failed"
+}
+
+# === STEP 5: Open Roblox Studio ===
+# Look for "Neurovia Coder" button in PLUGINS tab
+# Click to open the assistant!
 ```
 
-### Manual Install
+### Getting an API Key
+
+Plugin supports 4 providers. Choose one:
+
+**OpenAI (Recommended)**
+1. Go to https://platform.openai.com/api-keys
+2. Create account / Sign in
+3. Click "Create new secret key"
+4. Copy key (starts with `sk-...`)
+5. Paste in Neurovia when selecting GPT model
+
+**Anthropic (Claude)**
+1. Go to https://console.anthropic.com/
+2. Get API key (starts with `sk-ant-...`)
+
+**Google Gemini**
+1. Go to https://aistudio.google.com/app/apikey
+2. Create API key (starts with `AIza...`)
+
+**xAI (Grok)**
+1. Go to https://console.x.ai/
+2. Generate API key
+
+---
+
+## 🛠️ DEVELOPMENT WORKFLOW
+
+### Quick Edit (Most Common)
 
 ```powershell
-# Copy plugin file to Roblox Plugins folder
-Copy-Item "neurovia-coder-full.lua" "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua" -Force
+# 1. Open plugin file in editor
+notepad "$env:LOCALAPPDATA\Roblox\Plugins\NeuroviaVibe.lua"
+
+# 2. Make your changes
+
+# 3. Save (Ctrl+S)
+
+# 4. Restart Roblox Studio COMPLETELY
+# Close ALL Studio windows, wait 3 seconds, reopen
+
+# 5. Test your changes
+
+# 6. If working, commit to git
+Copy-Item "$env:LOCALAPPDATA\Roblox\Plugins\NeuroviaVibe.lua" ".\NeuroviaVibe.lua" -Force
+git add NeuroviaVibe.lua
+git commit -m "Your change description"
 ```
 
-**After installation:**
-1. Close Roblox Studio completely (if open)
-2. Open Roblox Studio
-3. Go to **Plugins** tab
-4. Click **"Neurovia Coder"** button
-5. UI panel will open on the left
-6. Configure API key with `/setkey YOUR_API_KEY`
+### Using Warp AI for Edits
+
+When I (Warp AI) make changes:
+
+1. I'll use `read_files` to understand current code
+2. I'll use `edit_files` to make precise changes
+3. You test in Roblox Studio
+4. If it works, you commit
+5. If issues, I'll fix based on your feedback
+
+**Important:** Always restart Studio after code changes!
 
 ---
 
-## ✨ Features
+## 📚 CURRENT FEATURES (v4.1.0)
 
-**Neurovia Coder v2.0.0** includes:
+### UI Components
 
-### Core Features
-- 🤖 **Multi-AI Support**: OpenAI GPT-4, Claude 3, Gemini Pro
-- 🟥 **Modern UI**: Roblox logo, timestamps, text wrapping
-- 💬 **Chat Interface**: Real-time AI conversations
-- 🔒 **Secure Storage**: Encrypted API key storage
-- 🌐 **Multilingual**: Turkish and English support
+**Tab System** (Lines 462-503)
+- Chat Tab: Main conversation with AI
+- Debug Tab: System logs and debug info
+- Smooth switching with scroll preservation
 
-### AI Enhancements
-- 🎯 **Intent Analyzer**: Detects user intent (create, modify, debug, explain, etc.)
-- 🧠 **5-Step Thinking Process**: AI uses structured problem-solving
-  1. Understand the request
-  2. Analyze the context
-  3. Plan the solution
-  4. Implement
-  5. Validate
+**Agent Mode Selector** (Lines 611-748)
+- **Agent (∞)**: Full autonomous execution
+- **Ask (💬)**: Research mode, no code execution
 
-### UI Features
-- Modern dark theme
-- Message bubbles with user/AI distinction
-- Timestamps (HH:MM:SS)
-- Auto-scrolling chat
-- Provider switching (OpenAI/Claude/Gemini)
-- Command system (`/setkey` for API keys)
+**Model Selector** (Lines 762-1055)
+- GPT-4 Turbo, GPT-4, GPT-3.5 (OpenAI)
+- Claude 3.5 Sonnet, Claude 3 Opus (Anthropic)
+- Gemini 2.0 Flash, Gemini 1.5 Pro (Google)
+- Grok 2 (xAI)
+
+**Quote Frame** (Lines 1391-1496)
+- Click ↩️ in debug log to quote in chat
+- Appears above message input
+- Sends context + your question to AI
+
+### Intelligence Features
+
+**Intent Detection** (Lines 2816-2862)
+- Understands: create, delete, fix, modify
+- Auto-routes to appropriate handler
+- Falls back to AI for complex requests
+
+**NPC Management** (Lines 3272-3330)
+- Quick creation: "5 NPC oluştur"
+- Auto-positioning with spacing
+- Organized in Workspace/Npcs folder
+
+**Smart Deletion** (Lines 2816-2862)
+- Detects: sil, kaldır, delete, remove, temizle
+- NPCs: "npcleri kaldır" removes all
+- Other objects: AI-assisted search
+- Confirms deletion with success message
+
+**Code Execution** (Lines 3538-3650)
+- Auto-detects: GUI, Script, or Model code
+- Places in correct location automatically
+- Creates LocalScript vs Script intelligently
+- Tracks locations for undo functionality
 
 ---
 
-## 📁 Project Structure
+## 🔧 CODE STRUCTURE
 
 ```
-rblx/
-├── neurovia-coder-full.lua   # ⭐ MAIN PLUGIN FILE (772 lines, all features)
-├── install-plugin.bat        # Quick install script
-├── src/                      # Source code (for reference/development)
-│   ├── Plugin.server.lua     # Entry point
-│   ├── Config.lua            # Configuration
-│   ├── AI/                   # AI providers (6 modules)
-│   ├── Core/                 # Core logic (5 modules)
-│   ├── UI/                   # User interface (3 modules)
-│   └── Utils/                # Utilities (5 modules)
+NeuroviaVibe.lua (3900+ lines)
+
+├── Lines 1-180       : Core Setup
+│   ├── Settings & Storage
+│   ├── AI Providers (4 providers)
+│   └── Context System
 │
-├── assets/locales/           # Translation files
-├── package.json              # NPM configuration (not used for plugin)
-├── default.project.json      # Rojo config (not used for plugin)
-├── README.md                 # Public readme
-└── WARP.md                   # This file (for Warp AI)
-```
-
-**Important:** The `src/` directory is for **reference only**. The actual plugin is `neurovia-coder-full.lua` (single file).
-
----
-
-## 💻 Common Commands
-
-### Install Plugin
-
-```powershell
-# Quick install
-.\install-plugin.bat
-
-# OR manual
-Copy-Item "neurovia-coder-full.lua" "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua" -Force
-```
-
-### Check Installation
-
-```powershell
-# Verify plugin file exists
-Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua"
-
-# View plugin file size
-(Get-Item "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua").Length
-```
-
----
-
-## 🔧 Making Code Changes
-
-### Typical Workflow
-
-1. **Ensure watch mode is running**: 
-pm run watch
-2. **Edit files in src/ directory** (e.g., src/Config.lua)
-3. **Save the file** (Ctrl+S)
-4. **Changes appear instantly in Roblox Studio** ✅
-
-### If watch mode isn't active:
-
-```powershell
-npm run build
-npm run install-plugin
-# Restart Roblox Studio
+├── Lines 181-503     : UI Framework
+│   ├── Widget & Root
+│   ├── Tab System
+│   └── Layout Management
+│
+├── Lines 504-1055    : Input Controls
+│   ├── Agent Mode Dropdown
+│   ├── Model Selection
+│   ├── API Key Dialogs
+│   └── Text Input
+│
+├── Lines 1056-1264   : Navigation & Layout
+│   ├── Arrow Key History
+│   ├── Layout Updates
+│   └── API Lock Indicator
+│
+├── Lines 1265-1500   : Debug System
+│   ├── Log Entries
+│   ├── Repost Button
+│   └── Quote Frame
+│
+├── Lines 1501-2609   : Messages & Display
+│   ├── Message Bubbles
+│   ├── Progress Bars
+│   ├── Ask Mode
+│   └── Auto-Apply
+│
+└── Lines 2610-3900+  : Core AI Logic
+    ├── Send Function (router)
+    ├── Intent Detection
+    ├── Prompt Building
+    ├── NPC Creation
+    ├── Code Execution
+    └── Error Handling
 ```
 
 ---
 
-## ❓ Why Single-File Plugin?
+## 🎨 CUSTOMIZATION GUIDE
 
-**Problem:** Rojo-packaged plugins (`.rbxm` and `.rbxmx`) were causing Studio to crash during plugin loading.
+### Change Colors
 
-**Solution:** Single `.lua` file deployment.
-
-**Benefits:**
-- ✅ **Stable**: No crashes, loads reliably
-- ✅ **Simple**: Just copy one file
-- ✅ **Fast**: Instant updates (no build process)
-- ✅ **Git-friendly**: Easy to track changes
-- ✅ **Portable**: Works on any machine
-
-**Trade-offs:**
-- ⚠️ Single file is large (~770 lines)
-- ⚠️ Manual updates (but simple: just copy file)
-
----
-
-## 🐛 Troubleshooting
-
-### Plugin Not Showing in Studio
-
-```powershell
-# Check if plugin file exists
-Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua"
-
-# If false, run install script:
-.\install-plugin.bat
-
-# Restart Roblox Studio completely
-```
-
-### Watch Mode Not Syncing
-
-```powershell
-# Check if watch mode is running
-netstat -ano | findstr :34872
-
-# If nothing shows, start watch mode:
-npm run watch
-
-# In Studio: Plugins → Rojo → Disconnect → Connect
-```
-
-### Build Errors
-
-```powershell
-# Check Rojo is installed
-rojo --version
-
-# If error, Rojo needs installation:
-# https://github.com/rojo-rbx/rojo/releases
-
-# Clean and rebuild
-npm run clean
-npm run build
-```
-
-### Rojo Plugin Not in Studio
-
-```powershell
-# Download and install Rojo plugin
-$url = 'https://github.com/rojo-rbx/rojo/releases/latest/download/rojo-plugin.rbxm'
-$dest = "$env:LOCALAPPDATA\Roblox\Plugins\rojo-plugin.rbxm"
-Invoke-WebRequest -Uri $url -OutFile 'rojo-plugin.rbxm' -UseBasicParsing
-Copy-Item 'rojo-plugin.rbxm' -Destination $dest -Force
-
-# Restart Studio
-```
-
----
-
-## 🎨 Common Development Tasks
-
-### Adding a New Feature
-
-```powershell
-# 1. Create new file (e.g., src/Utils/NewFeature.lua)
-New-Item -Path "src/Utils/NewFeature.lua" -ItemType File
-
-# 2. Edit the file with feature code
-
-# 3. If watch mode active: Changes sync automatically
-# 4. If not: npm run build && npm run install-plugin
-```
-
-### Modifying Configuration
-
-```powershell
-# Edit src/Config.lua for:
-# - API endpoints
-# - Default AI models  
-# - Debug settings
-# - UI configuration
-
-notepad src/Config.lua
-
-# Save → Auto-syncs if watch mode active
-```
-
-### Enabling Debug Mode
-
-Edit src/Config.lua:
 ```lua
-Config.DEBUG = {
-    ENABLED = true,
-    LOG_LEVEL = "DEBUG",
-    LOG_API_REQUESTS = true,
-    LOG_API_RESPONSES = true
+-- Lines 21-35
+local C = {
+  bg = Color3.fromRGB(30,30,30),          -- Background
+  accent = Color3.fromRGB(88,101,242),    -- Purple accent
+  success = Color3.fromRGB(67,181,129),   -- Green (success)
+  danger = Color3.fromRGB(237,66,69),     -- Red (errors)
+  text = Color3.fromRGB(220,221,222),     -- Main text
+  textMuted = Color3.fromRGB(140,142,145), -- Secondary text
 }
 ```
 
-Save and check Roblox Studio Output window for logs.
+### Add New AI Model
+
+```lua
+-- Lines 828-837 (inside showModelMenu function)
+local models = {
+  -- Add your model here:
+  {name='Your Model Name', model='model-id', provider='ProviderName'},
+  
+  -- Existing models...
+  {name='GPT-4 Turbo', model='gpt-4-turbo', provider='OpenAI'},
+  -- ...
+}
+```
+
+### Modify System Prompt
+
+```lua
+-- Lines 2857-2949 (sysPrompt variable)
+local sysPrompt = [[
+!!NEUROVIA CODER - ULTRA ADVANCED ASSISTANT!!
+You are Neurovia AI: The ULTIMATE Roblox development assistant.
+
+-- Add your custom instructions here
+]]
+```
 
 ---
 
-## 🏗️ Build System
+## 🐛 TROUBLESHOOTING
 
-### How It Works
+### Issue: Plugin Not Appearing in Studio
 
-1. **Rojo** reads default.project.json
-2. Combines all .lua files from src/ into XML-based .rbxmx file (human-readable)
-3. File is copied to %LOCALAPPDATA%\Roblox\Plugins\neurovia-coder.rbxmx
-4. Roblox Studio loads the plugin on startup
+**Solution:**
+```powershell
+# 1. Check file exists
+Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\NeuroviaVibe.lua"
 
-### Watch Mode
+# 2. If false, reinstall
+Copy-Item ".\NeuroviaVibe.lua" "$env:LOCALAPPDATA\Roblox\Plugins\" -Force
 
-- Runs Rojo server on **localhost:34872**
-- Studio connects via Rojo plugin
-- File changes sync automatically (no rebuild needed)
-- **35x faster** than manual build/restart
+# 3. Close Studio completely
+Stop-Process -Name "RobloxStudioBeta" -Force
+
+# 4. Wait 3 seconds, then open Studio
+```
+
+### Issue: API Key Shows Lock 🔒
+
+**Cause:** Key format doesn't match provider requirements
+
+**Check Formats:**
+- OpenAI: `sk-...` (50+ chars)
+- Anthropic: `sk-ant-...` (100+ chars)
+- Gemini: `AIza...` (39 chars exactly)
+- xAI: Any format (20+ chars)
+
+**Solution:** Re-enter key with correct format
+
+### Issue: Delete Commands Not Working
+
+**Cause:** Object name not found or misspelled
+
+**Solutions:**
+1. Use exact name from Explorer
+2. Try: "show me what I can delete"
+3. Use NPC shortcut: "npcleri kaldır"
+
+### Issue: Chat Messages Disappearing
+
+**Fixed in v4.1!** 
+- Scroll position now preserved during tab switching
+- Quote frame doesn't affect chat layout
+- Debug repost keeps messages visible
 
 ---
 
-## 📝 Git Workflow
+## 🤖 FOR WARP AI: EDITING GUIDELINES
+
+### Before Making Changes
+
+1. ✅ Read `NEUROVIA_PROJECT_STATE.md` for current state
+2. ✅ Use `read_files` to see current code
+3. ✅ Identify exact line numbers
+4. ✅ Explain what you're changing
+
+### When User Reports Bug
+
+1. Ask for screenshot if UI-related
+2. Identify affected system (UI/AI/Logic)
+3. Show current code at relevant lines
+4. Explain the bug
+5. Propose specific fix
+6. Use `edit_files` with exact line numbers
+7. Provide test steps
+
+### Making Edits
+
+```markdown
+## Example Response Format
+
+I'll fix [issue]. The problem is in [system] at lines [X-Y].
+
+**Current Code:**
+```lua
+-- Lines X-Y
+[show code]
+```
+
+**Issue:** [explain what's wrong]
+
+**Fix:** [explain solution]
+
+Making the change now...
+
+[Call edit_files]
+
+✅ Fixed! Test by:
+1. [step 1]
+2. [step 2]
+```
+
+### Testing Changes
 
 ```powershell
-# Create feature branch
-git checkout -b feature/my-feature
+# After making edits, user should:
 
-# Make changes, test
+# 1. Close Studio completely
+Stop-Process -Name "RobloxStudioBeta" -Force
 
-# Commit
+# 2. Wait
+Start-Sleep -Seconds 3
+
+# 3. Open Studio
+# Plugin will reload with changes
+
+# 4. Test the specific feature
+# User will report results
+```
+
+---
+
+## 📊 PROJECT STATISTICS
+
+```
+File: NeuroviaVibe.lua
+Size: ~160 KB
+Lines: 3900+
+Language: Lua (Roblox)
+Roblox API Version: Latest (2025)
+
+Code Distribution:
+├── UI Components:    1400 lines (36%)
+├── AI Integration:    900 lines (23%)
+├── Message System:    600 lines (15%)
+├── Logic & Routing:   700 lines (18%)
+└── Utilities:         300 lines (8%)
+
+Features:
+├── AI Models:         8
+├── Providers:         4
+├── Agent Modes:       2
+├── Tabs:              2
+└── Debug Log Types:   5
+```
+
+---
+
+## ✅ POST-INSTALL CHECKLIST
+
+After installation, verify these work:
+
+- [ ] Plugin appears in PLUGINS tab of Studio
+- [ ] "Neurovia Coder" button clickable
+- [ ] UI opens without errors
+- [ ] Chat tab and Debug tab both work
+- [ ] Agent mode dropdown shows ∞ and 💬
+- [ ] Model dropdown shows 8 models
+- [ ] Can click model to open API key dialog
+- [ ] Can enter and save API key
+- [ ] Lock icon 🔒 disappears when valid key entered
+- [ ] Can type message and press Enter
+- [ ] Message appears in chat
+- [ ] Can switch between tabs smoothly
+- [ ] Arrow keys (↑/↓) recall message history
+- [ ] Debug logs appear when actions happen
+- [ ] Can click ↩️ to repost debug log to chat
+
+---
+
+## 🚀 USEFUL COMMANDS
+
+```powershell
+# === INSTALLATION ===
+Copy-Item ".\NeuroviaVibe.lua" "$env:LOCALAPPDATA\Roblox\Plugins\" -Force
+
+# === BACKUP ===
+$ts = Get-Date -Format "yyyyMMdd_HHmmss"
+New-Item ".\backups" -ItemType Directory -Force -ErrorAction SilentlyContinue
+Copy-Item "$env:LOCALAPPDATA\Roblox\Plugins\NeuroviaVibe.lua" ".\backups\backup_$ts.lua"
+
+# === RESTORE ===
+Copy-Item ".\backups\backup_TIMESTAMP.lua" "$env:LOCALAPPDATA\Roblox\Plugins\NeuroviaVibe.lua" -Force
+
+# === EDIT ===
+code "$env:LOCALAPPDATA\Roblox\Plugins\NeuroviaVibe.lua"  # VS Code
+notepad "$env:LOCALAPPDATA\Roblox\Plugins\NeuroviaVibe.lua"  # Notepad
+
+# === VERSION CONTROL ===
+Copy-Item "$env:LOCALAPPDATA\Roblox\Plugins\NeuroviaVibe.lua" ".\NeuroviaVibe.lua" -Force
 git add .
-git commit -m "feat: description"
+git commit -m "Description"
+git push
 
-# Push
-git push origin feature/my-feature
+# === CHECK STATUS ===
+Get-Item "$env:LOCALAPPDATA\Roblox\Plugins\NeuroviaVibe.lua" | 
+  Select Name, @{Name="Size(KB)";Expression={[math]::Round($_.Length/1KB,2)}}, LastWriteTime
+
+# === RESTART STUDIO ===
+Stop-Process -Name "RobloxStudioBeta" -Force -ErrorAction SilentlyContinue
+Write-Host "Wait 3 seconds before reopening Studio..."
+Start-Sleep -Seconds 3
 ```
 
-### Commit Message Format
-- eat: - New feature
-- ix: - Bug fix
-- docs: - Documentation
-- efactor: - Code refactoring
-- chore: - Maintenance
+---
+
+## 📖 ADDITIONAL RESOURCES
+
+### Documentation
+- **Roblox Docs**: https://create.roblox.com/docs
+- **Lua Reference**: https://www.lua.org/manual/5.1/
+- **Roblox API**: https://create.roblox.com/docs/reference/engine
+
+### AI Providers
+- **OpenAI**: https://platform.openai.com/
+- **Anthropic**: https://www.anthropic.com/
+- **Google AI**: https://ai.google.dev/
+- **xAI**: https://x.ai/
+
+### Tools
+- **VS Code**: https://code.visualstudio.com/
+- **Git**: https://git-scm.com/
+- **PowerShell**: Built into Windows
 
 ---
 
-## 🔑 API Keys Setup
+**Version:** v4.1.0  
+**Status:** ✅ Production Ready  
+**Last Updated:** 2025-01-08 20:36 UTC  
+**Next Version:** v4.2.0 planned
 
-API keys are configured in Roblox Studio UI (not in code):
-
-1. Open Studio
-2. Open plugin: **Plugins → Neurovia Coder**
-3. Click settings icon (⚙️)
-4. Select provider and enter API key
-5. Keys are encrypted and stored in PluginSettings
-
-**Get API keys:**
-- OpenAI: https://platform.openai.com/api-keys
-- Claude: https://console.anthropic.com/
-- Gemini: https://makersuite.google.com/app/apikey
-
----
-
-## 🤖 Warp-Specific Instructions
-
-### When User Says: "Set up this project"
-
-Execute the complete setup workflow (see top of document).
-
-### When User Says: "Start development"
-
-```powershell
-npm run watch
-```
-
-Then instruct: "Connect in Studio: Plugins → Rojo → Connect to localhost:34872"
-
-### When User Says: "Make a change to [file]"
-
-1. Check if watch mode is running: 
-etstat -ano | findstr :34872
-2. If yes: "Edit the file, save, and it will auto-sync!"
-3. If no: "Start watch mode first with 
-pm run watch"
-
-### When User Reports Issues
-
-Use troubleshooting section commands to diagnose and fix.
-
----
-
-## ⚡ Quick Reference
-
-| Task | Command |
-|------|---------|
-| **First-time setup** | See complete workflow at top |
-| **Daily development** | 
-pm run watch |
-| **Manual build** | 
-pm run build |
-| **Install to Studio** | 
-pm run install-plugin |
-| **Check watch mode** | 
-etstat -ano \| findstr :34872 |
-|| **Check plugin file** | Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.rbxmx" |
-
----
-
-## 📚 Important Notes
-
-- **Always use watch mode** for development (35x faster)
-- **Source files are in src/** - never edit the .rbxmx file directly
-- **Restart Studio** if plugin doesn't appear after install
-- **Reconnect Rojo** if changes stop syncing
-- **Check Output window** in Studio for errors/logs
-
----
-
-## 🎯 Success Criteria
-
-Setup is successful when:
-1. ✅ 
-pm run watch is running without errors
-2. ✅ Roblox Studio shows "Rojo" button in Plugins tab
-3. ✅ Rojo shows green "Connected" status
-4. ✅ Editing src/Config.lua and saving updates Studio instantly
-
----
-
-**Version:** 1.0.0  
-**Last Updated:** 2024-11-08  
-**Status:** ✅ Production Ready
+**For Warp AI:** This is the COMPLETE setup and development guide. Read this + NEUROVIA_PROJECT_STATE.md before helping users. When editing code, always use exact line numbers and test in Roblox Studio.
