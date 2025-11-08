@@ -5,6 +5,7 @@
 ]]
 
 local Config = require(script.Parent.Parent.Config)
+local IntentAnalyzer = require(script.Parent.IntentAnalyzer)
 
 local PromptBuilder = {}
 PromptBuilder.__index = PromptBuilder
@@ -13,6 +14,7 @@ function PromptBuilder.new(codeAnalyzer)
 	local self = setmetatable({}, PromptBuilder)
 	
 	self._analyzer = codeAnalyzer
+	self._intentAnalyzer = IntentAnalyzer.new()
 	
 	return self
 end
@@ -48,10 +50,14 @@ function PromptBuilder:buildMessages(userMessage, selectedScript, includeContext
 		content = systemPrompt
 	})
 	
-	-- User message
+	-- Analyze user intent and enrich the message
+	local intentAnalysis = self._intentAnalyzer:analyze(userMessage)
+	local enrichedMessage = intentAnalysis.enrichedPrompt
+	
+	-- User message with intent analysis
 	table.insert(messages, {
 		role = "user",
-		content = userMessage
+		content = enrichedMessage
 	})
 	
 	return messages

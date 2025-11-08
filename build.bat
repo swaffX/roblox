@@ -2,17 +2,22 @@
 echo ========================================
 echo Building AI Coder Plugin...
 echo ========================================
-set "ROJO_PATH=%USERPROFILE%\.cargo\bin\rojo.exe"
-
-if not exist "%ROJO_PATH%" (
-    echo [ERROR] Rojo not found!
-    echo Please install with: cargo install rojo
-    pause
-    exit /b 1
+REM Try to find Rojo in PATH first
+where rojo >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    set "ROJO_CMD=rojo"
+) else (
+    set "ROJO_CMD=%USERPROFILE%\.cargo\bin\rojo.exe"
+    if not exist "!ROJO_CMD!" (
+        echo [ERROR] Rojo not found!
+        echo Please install with: cargo install rojo
+        pause
+        exit /b 1
+    )
 )
 
 echo [1/3] Building plugin with Rojo...
-"%ROJO_PATH%" build default.project.json -o plugin.rbxm
+%ROJO_CMD% build default.project.json -o plugin.rbxm
 
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Build failed!
