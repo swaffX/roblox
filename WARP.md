@@ -6,7 +6,7 @@ This file provides complete guidance to WARP AI for working with this Roblox Stu
 
 ## 🎯 Project Type
 
-**Roblox Studio Plugin** - AI-powered coding assistant with multi-provider support (OpenAI, Claude, Gemini)
+**Roblox Studio Plugin: Neurovia Coder** - AI-powered coding assistant with multi-provider support (OpenAI, Claude, Gemini)
 
 ---
 
@@ -116,7 +116,7 @@ npm run install-plugin
 
 ```powershell
 # Check if plugin file exists
-Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\AI-Coder-Plugin.rbxm"
+Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.rbxmx"
 
 # If false, reinstall:
 npm run install-plugin
@@ -213,8 +213,8 @@ Save and check Roblox Studio Output window for logs.
 ### How It Works
 
 1. **Rojo** reads default.project.json
-2. Combines all .lua files from src/ into binary .rbxm file
-3. File is copied to %LOCALAPPDATA%\Roblox\Plugins\AI-Coder-Plugin.rbxm
+2. Combines all .lua files from src/ into XML-based .rbxmx file (human-readable)
+3. File is copied to %LOCALAPPDATA%\Roblox\Plugins\neurovia-coder.rbxmx
 4. Roblox Studio loads the plugin on startup
 
 ### Watch Mode
@@ -256,7 +256,7 @@ git push origin feature/my-feature
 API keys are configured in Roblox Studio UI (not in code):
 
 1. Open Studio
-2. Open plugin: **Plugins → AI Coder**
+2. Open plugin: **Plugins → Neurovia Coder**
 3. Click settings icon (⚙️)
 4. Select provider and enter API key
 5. Keys are encrypted and stored in PluginSettings
@@ -309,14 +309,14 @@ pm run build |
 pm run install-plugin |
 | **Check watch mode** | 
 etstat -ano \| findstr :34872 |
-| **Check plugin file** | Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\AI-Coder-Plugin.rbxm" |
+|| **Check plugin file** | Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.rbxmx" |
 
 ---
 
 ## 📚 Important Notes
 
 - **Always use watch mode** for development (35x faster)
-- **Source files are in src/** - never edit the .rbxm file
+- **Source files are in src/** - never edit the .rbxmx file directly
 - **Restart Studio** if plugin doesn't appear after install
 - **Reconnect Rojo** if changes stop syncing
 - **Check Output window** in Studio for errors/logs

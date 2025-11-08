@@ -1,6 +1,6 @@
-﻿# Neurovia AI Coder
+﻿# Neurovia Coder
 
-🤖 AI-powered coding assistant for Roblox Studio
+🟥 AI-powered coding assistant for Roblox Studio
 
 Multi-AI support: OpenAI GPT-4, Claude 3, Google Gemini
 
@@ -39,7 +39,7 @@ Get your keys:
 - Claude: https://console.anthropic.com/
 - Gemini: https://makersuite.google.com/app/apikey
 
-Configure in Studio: Plugins → AI Coder → Settings
+Configure in Studio: Plugins → Neurovia Coder → Settings
 
 ---
 
