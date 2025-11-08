@@ -24,20 +24,24 @@ npm run install-plugin
 
 ## 📖 Documentation
 
-See **[PROJECT.md](PROJECT.md)** for complete documentation including:
-- Detailed installation guide
-- Architecture overview
-- Development workflow
-- API configuration
-- Troubleshooting
+- **[PROJECT.md](PROJECT.md)** - Complete documentation
+- **[WATCH_MODE_SETUP.md](WATCH_MODE_SETUP.md)** - Otomatik yansıma kurulumu (önerilen!)
 
 ## 💻 Development
 
 ```powershell
-npm run build           # Build plugin
-npm run dev             # Build + install
-npm run watch           # Watch mode
+# Manuel mod (build her seferinde)
+npm run build
+npm run install-plugin
+# Studio'yu restart et
+
+# Otomatik mod (önerilen - 35x daha hızlı!)
+npm run watch
+# Studio'da Rojo → Connect
+# Değişiklikler otomatik yansır!
 ```
+
+**⚡ Watch mode kurulumu için:** [WATCH_MODE_SETUP.md](WATCH_MODE_SETUP.md)
 
 ## 🔑 API Keys
 

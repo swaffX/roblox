@@ -1,30 +1,35 @@
 @echo off
 echo ========================================
-echo Starting Rojo Watch Mode...
+echo Rojo Watch Mode Ba?lat?l?yor...
 echo ========================================
 echo.
-echo This will keep running until you press Ctrl+C
-echo Connect to this server from Roblox Studio using the Rojo plugin
+echo Bu pencereyi A?IK TUTUN!
+echo De?i?iklikler otomatik olarak Studio'ya yans?yacak.
+echo.
+echo Durdurmak i?in: Ctrl+C
+echo.
+echo ========================================
 echo.
 
 set "ROJO_PATH=%USERPROFILE%\.cargo\bin\rojo.exe"
 
 if not exist "%ROJO_PATH%" (
-    echo [ERROR] Rojo not found!
-    echo Please install with: cargo install rojo
+    echo [ERROR] Rojo bulunamad?!
+    echo L?tfen ?unu ?al??t?r?n: cargo install rojo
+    echo.
+    echo Veya Rojo'yu indirin: https://github.com/rojo-rbx/rojo/releases
     pause
     exit /b 1
 )
 
-echo [INFO] Starting Rojo server...
-echo [INFO] Server will be available at: http://localhost:34872
-echo [INFO] Press Ctrl+C to stop
+echo [INFO] Rojo server ba?lat?l?yor...
+echo [INFO] Server adresi: http://localhost:34872
+echo [INFO] Studio'da: Plugins ? Rojo ? Connect
 echo.
 
 "%ROJO_PATH%" serve default.project.json
 
-REM If we get here, server stopped (user pressed Ctrl+C)
+REM Server durduruldu
 echo.
-echo [INFO] Rojo server stopped.
+echo [INFO] Rojo server durduruldu.
 pause
-
