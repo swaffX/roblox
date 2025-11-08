@@ -5,7 +5,12 @@
 ]]
 
 local Config = require(script.Parent.Parent.Config)
-local IntentAnalyzer = require(script.Parent.IntentAnalyzer)
+
+-- Try to load IntentAnalyzer (optional)
+local IntentAnalyzer
+local intentAnalyzerLoaded = pcall(function()
+	IntentAnalyzer = require(script.Parent.IntentAnalyzer)
+end)
 
 local PromptBuilder = {}
 PromptBuilder.__index = PromptBuilder
@@ -14,7 +19,22 @@ function PromptBuilder.new(codeAnalyzer)
 	local self = setmetatable({}, PromptBuilder)
 	
 	self._analyzer = codeAnalyzer
-	self._intentAnalyzer = IntentAnalyzer.new()
+	
+	-- Initialize IntentAnalyzer if available
+	if intentAnalyzerLoaded and IntentAnalyzer then
+		local success, result = pcall(function()
+			return IntentAnalyzer.new()
+		end)
+		if success then
+			self._intentAnalyzer = result
+		else
+			warn("[PromptBuilder] Failed to initialize IntentAnalyzer:", result)
+			self._intentAnalyzer = nil
+		end
+	else
+		warn("[PromptBuilder] IntentAnalyzer not available")
+		self._intentAnalyzer = nil
+	end
 	
 	return self
 end
@@ -50,14 +70,23 @@ function PromptBuilder:buildMessages(userMessage, selectedScript, includeContext
 		content = systemPrompt
 	})
 	
-	-- Analyze user intent and enrich the message
-	local intentAnalysis = self._intentAnalyzer:analyze(userMessage)
-	local enrichedMessage = intentAnalysis.enrichedPrompt
+	-- Analyze user intent and enrich the message (if available)
+	local userContent = userMessage
 	
-	-- User message with intent analysis
+	if self._intentAnalyzer then
+		local success, intentAnalysis = pcall(function()
+			return self._intentAnalyzer:analyze(userMessage)
+		end)
+		
+		if success and intentAnalysis and intentAnalysis.enrichedPrompt then
+			userContent = intentAnalysis.enrichedPrompt
+		end
+	end
+	
+	-- User message
 	table.insert(messages, {
 		role = "user",
-		content = enrichedMessage
+		content = userContent
 	})
 	
 	return messages
