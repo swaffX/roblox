@@ -202,7 +202,7 @@ function Components.ScrollFrame(props)
 	return frame
 end
 
--- Chat Message Bubble
+-- Chat Message Bubble (Modern Design)
 function Components.ChatMessage(props)
 	local isUser = props.Role == "user"
 	
@@ -215,23 +215,75 @@ function Components.ChatMessage(props)
 	
 	local layout = Instance.new("UIListLayout")
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Padding = UDim.new(0, 4)
+	layout.Padding = UDim.new(0, 6)
 	layout.Parent = container
 	
-	addPadding(container, 5)
+	addPadding(container, 8)
 	
-	-- Header (role + timestamp)
-	local header = Instance.new("TextLabel")
-	header.Name = "Header"
-	header.Text = isUser and "You" or "AI Assistant"
-	header.Font = Enum.Font.GothamBold
-	header.TextSize = 12
-	header.TextColor3 = isUser and Config.COLORS.USER_MESSAGE or Config.COLORS.AI_MESSAGE
-	header.BackgroundTransparency = 1
-	header.Size = UDim2.new(1, 0, 0, 16)
-	header.TextXAlignment = Enum.TextXAlignment.Left
-	header.LayoutOrder = 1
-	header.Parent = container
+	-- Header row (icon/avatar + name + timestamp)
+	local headerRow = Instance.new("Frame")
+	headerRow.Name = "HeaderRow"
+	headerRow.BackgroundTransparency = 1
+	headerRow.Size = UDim2.new(1, 0, 0, 20)
+	headerRow.LayoutOrder = 1
+	headerRow.Parent = container
+	
+	-- Avatar/Icon (User or Roblox logo)
+	if isUser then
+		-- User emoji
+		local userIcon = Instance.new("TextLabel")
+		userIcon.Name = "UserIcon"
+		userIcon.Text = "👤"
+		userIcon.Font = Enum.Font.Gotham
+		userIcon.TextSize = 16
+		userIcon.BackgroundTransparency = 1
+		userIcon.Size = UDim2.new(0, 20, 0, 20)
+		userIcon.Position = UDim2.new(0, 0, 0, 0)
+		userIcon.TextXAlignment = Enum.TextXAlignment.Center
+		userIcon.TextYAlignment = Enum.TextYAlignment.Center
+		userIcon.Parent = headerRow
+	else
+		-- Roblox logo (red square emoji as placeholder)
+		local robloxIcon = Instance.new("TextLabel")
+		robloxIcon.Name = "RobloxIcon"
+		robloxIcon.Text = "🟥" -- Roblox red square
+		robloxIcon.Font = Enum.Font.Gotham
+		robloxIcon.TextSize = 16
+		robloxIcon.BackgroundTransparency = 1
+		robloxIcon.Size = UDim2.new(0, 20, 0, 20)
+		robloxIcon.Position = UDim2.new(0, 0, 0, 0)
+		robloxIcon.TextXAlignment = Enum.TextXAlignment.Center
+		robloxIcon.TextYAlignment = Enum.TextYAlignment.Center
+		robloxIcon.Parent = headerRow
+	end
+	
+	-- Name label
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Name = "NameLabel"
+	nameLabel.Text = isUser and "You" or "AI Assistant"
+	nameLabel.Font = Enum.Font.GothamBold
+	nameLabel.TextSize = 12
+	nameLabel.TextColor3 = isUser and Config.COLORS.USER_MESSAGE or Config.COLORS.AI_MESSAGE
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Size = UDim2.new(0, 100, 0, 20)
+	nameLabel.Position = UDim2.new(0, 26, 0, 0)
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.TextYAlignment = Enum.TextYAlignment.Center
+	nameLabel.Parent = headerRow
+	
+	-- Timestamp
+	local timestamp = Instance.new("TextLabel")
+	timestamp.Name = "Timestamp"
+	timestamp.Text = os.date("%H:%M:%S")
+	timestamp.Font = Enum.Font.Gotham
+	timestamp.TextSize = 10
+	timestamp.TextColor3 = Color3.fromRGB(150, 150, 150)
+	timestamp.BackgroundTransparency = 1
+	timestamp.Size = UDim2.new(0, 60, 0, 20)
+	timestamp.Position = UDim2.new(0, 130, 0, 0)
+	timestamp.TextXAlignment = Enum.TextXAlignment.Left
+	timestamp.TextYAlignment = Enum.TextYAlignment.Center
+	timestamp.Parent = headerRow
 	
 	-- Message bubble
 	local bubble = Instance.new("Frame")
@@ -243,8 +295,25 @@ function Components.ChatMessage(props)
 	bubble.LayoutOrder = 2
 	bubble.Parent = container
 	
-	addCorner(bubble, 8)
-	addPadding(bubble, 10)
+	-- Modern rounded corners
+	addCorner(bubble, 12)
+	
+	-- More padding for better readability
+	local bubblePadding = Instance.new("UIPadding")
+	bubblePadding.PaddingLeft = UDim.new(0, 14)
+	bubblePadding.PaddingRight = UDim.new(0, 14)
+	bubblePadding.PaddingTop = UDim.new(0, 12)
+	bubblePadding.PaddingBottom = UDim.new(0, 12)
+	bubblePadding.Parent = bubble
+	
+	-- Subtle shadow effect
+	local shadow = Instance.new("UIStroke")
+	shadow.Name = "Shadow"
+	shadow.Color = Color3.fromRGB(0, 0, 0)
+	shadow.Thickness = 1
+	shadow.Transparency = 0.85
+	shadow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	shadow.Parent = bubble
 	
 	-- Message text
 	local message = Instance.new("TextLabel")
@@ -256,7 +325,7 @@ function Components.ChatMessage(props)
 	message.BackgroundTransparency = 1
 	message.Size = UDim2.new(1, 0, 0, 0)
 	message.AutomaticSize = Enum.AutomaticSize.Y
-	message.TextWrapped = true
+	message.TextWrapped = true -- Enable text wrapping for long messages
 	message.TextXAlignment = Enum.TextXAlignment.Left
 	message.TextYAlignment = Enum.TextYAlignment.Top
 	message.RichText = true
