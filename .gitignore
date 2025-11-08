@@ -32,3 +32,5 @@ rojo.toml.lock
 
 # Logs
 *.log
+# Cursor IDE
+.cursor/
