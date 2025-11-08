@@ -5,10 +5,10 @@
   "author": "swxff",
   "license": "MIT",
   "scripts": {
-    "build": "rojo build default.project.json -o plugin.rbxm",
-    "watch": "rojo serve default.project.json",
+    "build": "build.bat",
+    "watch": "watch.bat",
     "install-plugin": "powershell -Command \"New-Item -ItemType Directory -Path $env:LOCALAPPDATA\\Roblox\\Plugins -Force -ErrorAction SilentlyContinue; Copy-Item plugin.rbxm -Destination $env:LOCALAPPDATA\\Roblox\\Plugins\\AI-Coder-Plugin.rbxm -Force\"",
-    "dev": "npm run build && npm run install-plugin",
+    "dev": "build.bat",
     "clean": "powershell -Command \"Remove-Item plugin.rbxm -ErrorAction SilentlyContinue\""
   },
   "keywords": [
