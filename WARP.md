@@ -6,42 +6,68 @@ This file provides complete guidance to WARP AI for working with this Roblox Stu
 
 ## 🎯 Project Type
 
-**Roblox Studio Plugin: Neurovia Coder** - AI-powered coding assistant with multi-provider support (OpenAI, Claude, Gemini)
+**Roblox Studio Plugin: Neurovia Coder v2.0.0** - AI-powered coding assistant with multi-provider support (OpenAI, Claude, Gemini)
+
+**IMPORTANT: Single-File Plugin System**
+This project uses a **single .lua file** deployment to avoid Rojo packaging crashes. The source code is modular (`src/` directory) but builds to one file (`neurovia-coder-full.lua`).
 
 ---
 
 ## 🚀 Complete Setup Workflow (Run This for New Contributors)
 
-When a new contributor asks to set up the project, execute these commands in sequence:
+This project uses a **single-file plugin** system to avoid Rojo packaging crashes.
+
+### Quick Install (Recommended)
 
 ```powershell
-# Step 1: Install dependencies
-npm install
-
-# Step 2: Download and install Rojo plugin
-$pluginUrl = 'https://github.com/rojo-rbx/rojo/releases/latest/download/rojo-plugin.rbxm'
-$pluginPath = "$env:LOCALAPPDATA\Roblox\Plugins\rojo-plugin.rbxm"
-Invoke-WebRequest -Uri $pluginUrl -OutFile 'rojo-plugin.rbxm' -UseBasicParsing
-New-Item -ItemType Directory -Path "$env:LOCALAPPDATA\Roblox\Plugins" -Force -ErrorAction SilentlyContinue
-Copy-Item 'rojo-plugin.rbxm' -Destination $pluginPath -Force
-
-# Step 3: Build plugin
-npm run build
-
-# Step 4: Install to Roblox Studio
-npm run install-plugin
-
-# Step 5: Start watch mode
-Start-Process powershell -ArgumentList '-NoExit', '-Command', 'npm run watch'
+# Run install script
+.\install-plugin.bat
 ```
 
-**After commands complete, instruct user:**
-1. Open Roblox Studio
-2. Go to **Plugins** tab
-3. Click **Rojo** button
-4. Click **Connect**
-5. Connect to **localhost:34872**
-6. Plugin is now auto-syncing! Changes in src/ will appear instantly in Studio.
+### Manual Install
+
+```powershell
+# Copy plugin file to Roblox Plugins folder
+Copy-Item "neurovia-coder-full.lua" "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua" -Force
+```
+
+**After installation:**
+1. Close Roblox Studio completely (if open)
+2. Open Roblox Studio
+3. Go to **Plugins** tab
+4. Click **"Neurovia Coder"** button
+5. UI panel will open on the left
+6. Configure API key with `/setkey YOUR_API_KEY`
+
+---
+
+## ✨ Features
+
+**Neurovia Coder v2.0.0** includes:
+
+### Core Features
+- 🤖 **Multi-AI Support**: OpenAI GPT-4, Claude 3, Gemini Pro
+- 🟥 **Modern UI**: Roblox logo, timestamps, text wrapping
+- 💬 **Chat Interface**: Real-time AI conversations
+- 🔒 **Secure Storage**: Encrypted API key storage
+- 🌐 **Multilingual**: Turkish and English support
+
+### AI Enhancements
+- 🎯 **Intent Analyzer**: Detects user intent (create, modify, debug, explain, etc.)
+- 🧠 **5-Step Thinking Process**: AI uses structured problem-solving
+  1. Understand the request
+  2. Analyze the context
+  3. Plan the solution
+  4. Implement
+  5. Validate
+
+### UI Features
+- Modern dark theme
+- Message bubbles with user/AI distinction
+- Timestamps (HH:MM:SS)
+- Auto-scrolling chat
+- Provider switching (OpenAI/Claude/Gemini)
+- Command system (`/setkey` for API keys)
 
 ---
 
@@ -49,43 +75,47 @@ Start-Process powershell -ArgumentList '-NoExit', '-Command', 'npm run watch'
 
 ```
 rblx/
-├── src/                      # Source code (edit these files)
+├── neurovia-coder-full.lua   # ⭐ MAIN PLUGIN FILE (772 lines, all features)
+├── install-plugin.bat        # Quick install script
+├── src/                      # Source code (for reference/development)
 │   ├── Plugin.server.lua     # Entry point
-│   ├── Config.lua            # Configuration (API keys, models, debug)
+│   ├── Config.lua            # Configuration
 │   ├── AI/                   # AI providers (6 modules)
 │   ├── Core/                 # Core logic (5 modules)
 │   ├── UI/                   # User interface (3 modules)
 │   └── Utils/                # Utilities (5 modules)
 │
 ├── assets/locales/           # Translation files
-├── build.bat                 # Build script
-├── watch.bat                 # Watch mode script
-├── package.json              # NPM configuration
-├── default.project.json      # Rojo build config
-└── WARP.md                   # This file
+├── package.json              # NPM configuration (not used for plugin)
+├── default.project.json      # Rojo config (not used for plugin)
+├── README.md                 # Public readme
+└── WARP.md                   # This file (for Warp AI)
 ```
+
+**Important:** The `src/` directory is for **reference only**. The actual plugin is `neurovia-coder-full.lua` (single file).
 
 ---
 
 ## 💻 Common Commands
 
-### Daily Development
+### Install Plugin
 
 ```powershell
-# Start watch mode (recommended - auto-sync)
-npm run watch
+# Quick install
+.\install-plugin.bat
 
-# Manual build + install (if not using watch mode)
-npm run build
-npm run install-plugin
-# Then restart Roblox Studio
+# OR manual
+Copy-Item "neurovia-coder-full.lua" "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua" -Force
 ```
 
-### Utility Commands
+### Check Installation
 
 ```powershell
-npm run dev      # Build + install in one command
-npm run clean    # Clean build artifacts
+# Verify plugin file exists
+Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua"
+
+# View plugin file size
+(Get-Item "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua").Length
 ```
 
 ---
@@ -110,16 +140,35 @@ npm run install-plugin
 
 ---
 
+## ❓ Why Single-File Plugin?
+
+**Problem:** Rojo-packaged plugins (`.rbxm` and `.rbxmx`) were causing Studio to crash during plugin loading.
+
+**Solution:** Single `.lua` file deployment.
+
+**Benefits:**
+- ✅ **Stable**: No crashes, loads reliably
+- ✅ **Simple**: Just copy one file
+- ✅ **Fast**: Instant updates (no build process)
+- ✅ **Git-friendly**: Easy to track changes
+- ✅ **Portable**: Works on any machine
+
+**Trade-offs:**
+- ⚠️ Single file is large (~770 lines)
+- ⚠️ Manual updates (but simple: just copy file)
+
+---
+
 ## 🐛 Troubleshooting
 
 ### Plugin Not Showing in Studio
 
 ```powershell
 # Check if plugin file exists
-Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.rbxmx"
+Test-Path "$env:LOCALAPPDATA\Roblox\Plugins\neurovia-coder.lua"
 
-# If false, reinstall:
-npm run install-plugin
+# If false, run install script:
+.\install-plugin.bat
 
 # Restart Roblox Studio completely
 ```

@@ -7,9 +7,9 @@
   "scripts": {
     "build": "build.bat",
     "watch": "watch.bat",
-    "install-plugin": "powershell -Command \"New-Item -ItemType Directory -Path $env:LOCALAPPDATA\\Roblox\\Plugins -Force -ErrorAction SilentlyContinue; Copy-Item neurovia-coder.rbxmx -Destination $env:LOCALAPPDATA\\Roblox\\Plugins\\neurovia-coder.rbxmx -Force\"",
+    "install-plugin": "powershell -Command \"New-Item -ItemType Directory -Path $env:LOCALAPPDATA\\Roblox\\Plugins -Force -ErrorAction SilentlyContinue; Copy-Item neurovia-coder.rbxm -Destination $env:LOCALAPPDATA\\Roblox\\Plugins\\neurovia-coder.rbxm -Force\"",
     "dev": "build.bat",
-    "clean": "powershell -Command \"Remove-Item neurovia-coder.rbxmx -ErrorAction SilentlyContinue\""
+    "clean": "powershell -Command \"Remove-Item neurovia-coder.rbxm -ErrorAction SilentlyContinue\""
   },
   "keywords": [
     "roblox",

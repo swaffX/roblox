@@ -17,7 +17,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 
 echo [1/3] Building plugin with Rojo...
-%ROJO_CMD% build default.project.json -o neurovia-coder.rbxmx
+%ROJO_CMD% build default.project.json -o neurovia-coder.rbxm
 
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Build failed!
@@ -25,13 +25,13 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-if not exist "neurovia-coder.rbxmx" (
+if not exist "neurovia-coder.rbxm" (
     echo [ERROR] Build file not created!
     pause
     exit /b 1
 )
 
-echo [2/3] Build successful! (neurovia-coder.rbxmx created)
+echo [2/3] Build successful! (neurovia-coder.rbxm created)
 echo [3/3] Installing plugin to Roblox Studio...
 
 REM Create Plugins directory if it doesn't exist
@@ -42,7 +42,7 @@ if not exist "%LOCALAPPDATA%\Roblox\Plugins" (
 
 REM Copy plugin to Roblox Plugins folder
 echo Copying plugin to Roblox Plugins directory...
-copy /Y neurovia-coder.rbxmx "%LOCALAPPDATA%\Roblox\Plugins\neurovia-coder.rbxmx"
+copy /Y neurovia-coder.rbxm "%LOCALAPPDATA%\Roblox\Plugins\neurovia-coder.rbxm"
 
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Failed to copy plugin!
@@ -51,7 +51,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 REM Verify installation
-if not exist "%LOCALAPPDATA%\Roblox\Plugins\neurovia-coder.rbxmx" (
+if not exist "%LOCALAPPDATA%\Roblox\Plugins\neurovia-coder.rbxm" (
     echo [ERROR] Plugin file not found after copy!
     pause
     exit /b 1
@@ -60,7 +60,7 @@ if not exist "%LOCALAPPDATA%\Roblox\Plugins\neurovia-coder.rbxmx" (
 echo.
 echo ========================================
 echo SUCCESS! Plugin installed to:
-echo %LOCALAPPDATA%\Roblox\Plugins\neurovia-coder.rbxmx
+echo %LOCALAPPDATA%\Roblox\Plugins\neurovia-coder.rbxm
 echo ========================================
 echo.
 echo Next steps:
